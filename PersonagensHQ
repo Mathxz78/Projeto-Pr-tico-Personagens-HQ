@@ -17,15 +17,20 @@ Professor: Igor Enrick de Carvalho
 #include <string>
 #include <algorithm>
 #include <cstring>
-#include <unistd.h>
-#include <unistd.h> 
+#include <unistd.h> // sleep()
 
-#define VERDE   "\033[32m"
-#define AZUL    "\033[34m"
-#define AMARELO "\033[33m"
-#define ROXO    "\033[35m"
-#define NEGRITO "\033[1m"
 #define RESET   "\033[0m"
+#define VERMELHO "\033[31m"
+#define VERDE    "\033[32m"
+#define AMARELO  "\033[33m"
+#define AZUL     "\033[34m"
+#define ROXO     "\033[35m"
+#define CIANO    "\033[36m"
+#define BRANCO   "\033[37m"
+#define NEGRITO  "\033[1m"
+#define FUNDO_AZUL "\033[44m"
+#define FUNDO_PRETO "\033[40m"
+#define FUNDO_ROXO "\033[45m"
 
 using namespace std;
 
@@ -45,6 +50,18 @@ struct binario {
     bool removido;
 };
 
+void limparTela() {
+    cout << "\033[2J\033[1;1H";
+}
+
+void animacaoCarregando() {
+    cout << CIANO << "Carregando";
+    for (int i = 0; i < 3; i++) {
+        cout << "."; cout.flush(); sleep(1);
+    }
+    cout << RESET << endl;
+}
+
 void aumentarVetor(personagem *&persona, int &tamanho, int incrementar, int &elementos) {
     personagem *novoVetor = new personagem[tamanho + incrementar];
     for (int j = 0; j < elementos; j++) {
@@ -56,7 +73,7 @@ void aumentarVetor(personagem *&persona, int &tamanho, int incrementar, int &ele
 }
 
 void salvarBinario(personagem persona[], int tamanho) {
-    ofstream arq("biblioteca.dat", ios::binary| ios::trunc);
+    ofstream arq("biblioteca.dat", ios::binary | ios::trunc);
     binario b;
     for (int i = 0; i < tamanho; i++) {
         if (!persona[i].removido) {
@@ -69,25 +86,29 @@ void salvarBinario(personagem persona[], int tamanho) {
         }
     }
     arq.close();
+    cout << VERDE << "\n✅ Dados salvos no arquivo binário com sucesso!" << RESET << endl;
+    sleep(1);
 }
 
 void listarPersonagens(personagem persona[], int elementos) {
     bool encontrou = false;
-    cout << "Lista de personagens:\n";
-    cout << "-------------------------------------------\n";
+    animacaoCarregando();
+    cout << NEGRITO << CIANO << "\nLista de personagens:\n" << RESET;
+    cout << BRANCO << "-------------------------------------------\n";
     for (int i = 0; i < elementos; i++) {
         if (!persona[i].removido) {
-            cout << "Nome: " << persona[i].nome << "\n"
-                 << "Alinhamento: " << persona[i].alinhamento << "\n"
-                 << "Publicador: " << persona[i].publicador << "\n"
-                 << "Ano: " << persona[i].ano << "\n"
-                 << "-------------------------------------------\n";
+            cout << VERDE << "Nome: " << RESET << persona[i].nome << "\n"
+                 << AMARELO << "Alinhamento: " << RESET << persona[i].alinhamento << "\n"
+                 << AZUL << "Publicador: " << RESET << persona[i].publicador << "\n"
+                 << ROXO << "Ano: " << RESET << persona[i].ano << "\n"
+                 << BRANCO << "-------------------------------------------\n" << RESET;
             encontrou = true;
         }
     }
     if (!encontrou) {
-        cout << "Nenhum personagem disponível para exibir.\n";
+        cout << FUNDO_PRETO << VERMELHO << NEGRITO << "⚠️  Nenhum personagem disponível para exibir.\n" << RESET;
     }
+    sleep(2);
 }
 
 void carregarBinario(personagem *&persona, int &tamanho, int &elementos) {
@@ -123,6 +144,8 @@ void carregarCSV(personagem persona[], int &elementos, int capacidade) {
         elementos++;
     }
     arq.close();
+    cout << VERDE << "\n✅ CSV carregado com sucesso!\n" << RESET;
+    sleep(1);
 }
 
 void salvarCSV(personagem persona[], int elementos) {
@@ -136,21 +159,25 @@ void salvarCSV(personagem persona[], int elementos) {
         }
     }
     arq.close();
+    cout << VERDE << "\n✅ CSV salvo com sucesso!\n" << RESET;
+    sleep(1);
 }
 
 void removerPersonagem(personagem persona[], int elementos) {
     string nome;
-    cout << "Nome do personagem para remover: ";
+    cout << CIANO << "\nDigite o nome do personagem a ser removido: " << RESET;
     cin.ignore();
     getline(cin, nome);
     for (int i = 0; i < elementos; i++) {
         if (!persona[i].removido && persona[i].nome == nome) {
             persona[i].removido = true;
-            cout << "Removido com sucesso!\n";
+            cout << VERDE << "\n✅ Removido com sucesso!\n" << RESET;
+            sleep(1);
             return;
         }
     }
-    cout << "Personagem não encontrado.\n";
+    cout << FUNDO_PRETO << VERMELHO << NEGRITO << "\n⚠️  Personagem não encontrado.\n" << RESET;
+    sleep(1);
 }
 
 void ordenarPorNome(personagem persona[], int elementos) {
@@ -161,7 +188,8 @@ void ordenarPorNome(personagem persona[], int elementos) {
         }
         swap(persona[i], persona[menor]);
     }
-    cout << "Ordenado por nome.\n";
+    cout << VERDE << "\n✅ Ordenado por nome.\n" << RESET;
+    sleep(1);
 }
 
 void ordenarPorAno(personagem persona[], int elementos) {
@@ -174,7 +202,8 @@ void ordenarPorAno(personagem persona[], int elementos) {
         }
         persona[j + 1] = chave;
     }
-    cout << "Ordenado por ano.\n";
+    cout << VERDE << "\n✅ Ordenado por ano.\n" << RESET;
+    sleep(1);
 }
 
 int buscaBinariaNome(personagem persona[], int esquerda, int direita, const string &chave) {
@@ -189,44 +218,50 @@ int buscaBinariaNome(personagem persona[], int esquerda, int direita, const stri
 
 void buscarPorNome(personagem persona[], int elementos) {
     string nome;
-    cout << "Digite o nome exato para busca binária: ";
+    cout << CIANO << "\nDigite o nome exato para busca binária: " << RESET;
     cin.ignore();
     getline(cin, nome);
     int index = buscaBinariaNome(persona, 0, elementos - 1, nome);
     if (index != -1 && !persona[index].removido) {
-        cout << "Encontrado: " << persona[index].nome << ", "
+        cout << VERDE << "\nEncontrado: " << persona[index].nome << ", "
              << persona[index].alinhamento << ", "
              << persona[index].publicador << ", "
-             << persona[index].ano << "\n";
+             << persona[index].ano << RESET << "\n";
     } else {
-        cout << "Personagem não encontrado.\n";
+        cout << FUNDO_PRETO << VERMELHO << NEGRITO << "\n⚠️  Personagem não encontrado.\n" << RESET;
     }
+    sleep(1);
 }
 
 void exibirIntervalo(personagem persona[], int elementos) {
     int inicio, fim;
-    cout << "Ano inicial: ";
+    cout << CIANO << "\nAno inicial: " << RESET;
     cin >> inicio;
-    cout << "Ano final: ";
+    cout << CIANO << "Ano final: " << RESET;
     cin >> fim;
     if (inicio > fim) swap(inicio, fim);
     for (int i = 0; i < elementos; i++) {
         if (!persona[i].removido && persona[i].ano >= inicio && persona[i].ano <= fim) {
-            cout << persona[i].nome << " (" << persona[i].ano << ")\n";
+            cout << VERDE << persona[i].nome << " (" << persona[i].ano << ")\n" << RESET;
         }
     }
+    sleep(2);
 }
 
 void creditos() {
-    cout << AZUL << NEGRITO <<	"Obrigado por usar nosso sistema!\n" << RESET;
-    cout << AZUL << NEGRITO <<	"Trabalho de Introdução aos Algoritmos\n" << RESET << endl;
-    cout << AMARELO << NEGRITO <<	"Tema: Personagens de Quadrinho\n" << RESET << endl;
-    cout << VERDE << NEGRITO <<	"Alunos:\n";
-    cout << VERDE << NEGRITO <<	"    Matheus Botelho Pereira\n";
-    cout << VERDE << NEGRITO <<	"    Nielon Cardoso dos Reis\n";
-    cout << VERDE << NEGRITO <<	"    Otávio Augusto Silvério Silva\n";
-    cout << ROXO << NEGRITO <<	"Professor:  Igor Enrick de Carvalho\n" << RESET << endl;
-    cout << "\n\n";
+    limparTela();
+    cout << FUNDO_ROXO << NEGRITO;
+    cout << "╔═════════════════════════════════════════════╗\n";
+    cout << "║     Obrigado por usar nosso sistema!        ║\n";
+    cout << "╚═════════════════════════════════════════════╝\n";
+    cout << RESET;
+    cout << FUNDO_ROXO << NEGRITO << "Trabalho de Introdução aos Algoritmos\n" << RESET;
+    cout << AMARELO << "Tema: Personagens de Quadrinho\n" << RESET;
+    cout << VERDE << "Alunos:\n";
+    cout << VERDE << "- Matheus Botelho Pereira\n";
+    cout << VERDE << "- Nielon Cardoso dos Reis\n";
+    cout << VERDE << "- Otávio Augusto Silvério Silva\n";
+    cout << ROXO << "Professor: Igor Enrick de Carvalho\n\n" << RESET;
     sleep(5);
 }
 
@@ -238,13 +273,33 @@ int main() {
     carregarBinario(persona, tamanho, elementos);
 
     do {
-        cout << "\n ---------------MENU-----------------\n1. Carregar CSV\n2. Salvar CSV\n3. Inserir\n4. Remover\n5. Ordenar\n6. Buscar nome\n7. Exibir intervalo\n8. Salvar Binário\n9. Listar personagens\n0. Sair\nOpcao: ";
+        limparTela();
+        cout << FUNDO_PRETO << VERDE << NEGRITO;
+        cout << "\n╔══════════════════════════════════════╗\n";
+        cout << "║          MENU DE OPÇÕES              ║\n";
+        cout << "╠══════════════════════════════════════╣\n";
+        cout << "║ 1. Carregar CSV                      ║\n";
+        cout << "║ 2. Salvar CSV                        ║\n";
+        cout << "║ 3. Inserir                           ║\n";
+        cout << "║ 4. Remover                           ║\n";
+        cout << "║ 5. Ordenar                           ║\n";
+        cout << "║ 6. Buscar nome                       ║\n";
+        cout << "║ 7. Exibir intervalo                  ║\n";
+        cout << "║ 8. Salvar Binário                    ║\n";
+        cout << "║ 9. Listar personagens                ║\n";
+        cout << "║ 0. Sair                              ║\n";
+        cout << "╚══════════════════════════════════════╝\n";
+        cout << RESET << BRANCO << "Personagens cadastrados: " << elementos << "\n";
+        cout << CIANO << "\nDigite uma opção:\n" << AMARELO << ">> " << RESET;
         cin >> opcao;
+
         switch (opcao) {
             case 1:
+                animacaoCarregando();
                 carregarCSV(persona, elementos, tamanho);
                 break;
             case 2:
+                animacaoCarregando();
                 salvarCSV(persona, elementos);
                 break;
             case 3:
@@ -288,16 +343,24 @@ int main() {
             case 9:
                 listarPersonagens(persona, elementos);
                 break;
-            case 0:
-                creditos(); 
+            case 0: {
+                char salvar;
+                cout << AMARELO << "Deseja salvar os dados antes de sair? (s/n): " << RESET;
+                cin >> salvar;
+                if (salvar == 's' || salvar == 'S') {
+                    salvarCSV(persona, elementos);
+                    salvarBinario(persona, elementos);
+                }
+                creditos();
                 cout << "Saindo...\n";
                 break;
+            }
             default:
-                cout << "Opção inválida.\n";
+                cout << FUNDO_PRETO << VERMELHO << NEGRITO << "⚠️  Opção inválida.\n" << RESET;
+                sleep(1);
         }
     } while (opcao != 0);
 
     delete[] persona;
-
     return 0;
 }
